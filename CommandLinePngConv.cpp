@@ -11,6 +11,8 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+#include <map>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -25,6 +27,9 @@ CCommandLinePngConv::CCommandLinePngConv()
 , m_bZigZag(false)
 , m_bReverse(false)
 , m_bUpsideDown(false)
+, m_bUseRGBMask(false)
+, m_bInverseByte(false)
+, m_sLeadText("db ")
 {
 	m_pOrigin.x = m_pOrigin.y = 0;
 	m_pSize.x = m_pSize.y = -1;
@@ -76,6 +81,12 @@ void CCommandLinePngConv::ParseParam(std::string param, bool bFlag, bool bLast)
 			m_bReverse = false;
 		else if (!param.compare("usd"))
 			m_bUpsideDown = true;
+		else if (!param.compare(0, 3, "mc="))
+			m_bUseRGBMask = DecodeRGB3(param.substr(3));
+		else if (!param.compare("iimg"))
+			m_bInverseByte = true;
+		else if (!param.compare(0, 4, "odb="))
+			m_sLeadText = param.substr(4);
 		else
 			m_bCommandLineError = true;
 	}
@@ -110,7 +121,6 @@ std::string CCommandLinePngConv::Help()
 	help += "\n  -ss             Silent operation";
 	help += "\n  -pos=x,y        Origin of conversion image, may be negative 0,0 = top left";
 	help += "\n  -size=x,y       Size of conversion image in pixels";
-	help += "\n  -imask          Inverse mask. Default is Pixel On";
 	help += "\n  -mask=<mask>    Mask format - one of:";
 	help += "\n                    b    : Output only Image (default)";
 	help += "\n                    m    : Output only Mask";
@@ -118,9 +128,14 @@ std::string CCommandLinePngConv::Help()
 	help += "\n                    bm   : Alternate Image and Mask bytes";
 	help += "\n                    mmbb : Alternate Mask and Image lines";
 	help += "\n                    bbmm : Alternate Image and Mask lines";
+	help += "\n  -mc=rgb         Take mask from 3-char RGB value rather than alpha channel";
+	help += "\n  -imask          Inverse mask. Default is Pixel On";
+	help += "\n  -iimg           Inverse image. Default is White = On";
 	help += "\n  -ostd           Send output to stdout rather than a file";
 	help += "\n                  This option implies -ss to remove junk from output";
 	help += "\n  -otxt           Output as text";
+	help += "\n  -odb=<db>       Leading text when -otxt option used. Default is \"db \".";
+	help += "\n                  \"-odb=\" will give no leading text in output.";
 	help += "\n  -obin           Output as binary (default)";
 	help += "\n  -ltr|rtl        Set output left-to-right (default) or right-to-left";
 	help += "\n  -zz             ZigZag Output (alternate ltr, rtl)";
@@ -181,4 +196,43 @@ ZXIMAGEFORMAT CCommandLinePngConv::DecodeMask(std::string param)
 	else m_bCommandLineError = true;
 
 	return retval;
+}
+
+bool CCommandLinePngConv::DecodeRGB3(std::string param)
+{
+	// check the string that's been passed in and decode
+	if (param.size() != 3 || param.find_first_not_of("0123456789abcdef") != std::string::npos)
+	{
+		m_bCommandLineError = true;
+	}
+	else
+	{
+		// it's 3 characters long and hexadecimal
+		// for now we'll use a map to provide the conversion from character to number.
+		// yes it's messy, but it will work for now. really.  *cough*
+		std::map<char,rgbaval> hexmap;
+		hexmap['0'] = 0x00;
+		hexmap['1'] = 0x10;
+		hexmap['2'] = 0x20;
+		hexmap['3'] = 0x30;
+		hexmap['4'] = 0x40;
+		hexmap['5'] = 0x50;
+		hexmap['6'] = 0x60;
+		hexmap['7'] = 0x70;
+		hexmap['8'] = 0x80;
+		hexmap['9'] = 0x90;
+		hexmap['a'] = 0xa0;
+		hexmap['b'] = 0xb0;
+		hexmap['c'] = 0xc0;
+		hexmap['d'] = 0xd0;
+		hexmap['e'] = 0xe0;
+		hexmap['f'] = 0xf0;
+
+		m_rgbaMaskColour.btRed = hexmap[param[0]];
+		m_rgbaMaskColour.btGrn = hexmap[param[1]];
+		m_rgbaMaskColour.btBlu = hexmap[param[2]];
+
+	}
+
+	return !m_bCommandLineError;
 }

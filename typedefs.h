@@ -3,7 +3,7 @@
 #ifndef __PNGCONV__TYPEDEFS__H__INC
 #define __PNGCONV__TYPEDEFS__H__INC
 
-#define PNGCONV_VERSION_STRING	"0.0.1"
+#define PNGCONV_VERSION_STRING	"0.0.2"
 #define PNGCONV_BUILD_DATE		__DATE__
 #define PNGCONV_BUILD_TIME		__TIME__
 #define PNGCONV_SHORT_TITLE		"PngConv"
@@ -54,6 +54,13 @@ public:
 
 	inline bool PixelIsMasked(int threshold = 128) {
 		return (int)btAlp <= threshold;
+	}
+
+	inline bool PixelIsMasked(RGBA _rgba) {
+		int bludif = abs(_rgba.btBlu - btBlu);
+		int reddif = abs(_rgba.btRed - btRed);
+		int grndif = abs(_rgba.btGrn - btGrn);
+		return (bludif < 16) && (reddif < 16) && (grndif < 16);
 	}
 
 	rgbaval btRed;

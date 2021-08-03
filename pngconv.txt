@@ -1,12 +1,29 @@
-PngConv v0.0.1
+PngConv v0.0.2
 =------------=
 
-PNGConv is a PNG to ZX Spectrum Image Convertor. The aim is to allow you to perform image conversions from the command-line, primarily from with a makefile or batch file. This is an early test release, so don't rely on it to do what you would expect.
+PNGConv is a PNG to ZX Spectrum Image Convertor. The aim is to allow you to
+perform image conversions from the command-line, primarily from with a makefile
+or batch file. This is an early test release, so don't rely on it to do what you
+would expect.
+
 
 
 History:
 ========
-v0.0.1	: First public release.
+
+v0.0.2 - 07/11/2006
+------
++ Allow definition of a colour as mask. Overrides use of Alpha channel if
+  specified.
++ Allow inversion of image data as well as mask. Default was White = On.
+- Shuffled around a loop to remove some duplicate code and make things a
+  little more manageable.
++ Added "-odb=" option to provide alternate leading text on output.
+
+v0.0.1 - 06/11/2006
+------
++ First public release.
+
 
 
 Command Line
@@ -15,50 +32,66 @@ PngConv [options] input [output]
 
 Detail:
 
-input		: This parameter is required and is the source .png file. There is no required format - the image will be converted internally to the correct format, providing the image can be read by pnglib. Masking for the output sprite is taken from the alpha channel of the input.
+input         : This parameter is required and is the source .png file. There
+                is no required format - the image will be converted internally
+                to the correct format, providing the image can be read by
+                pnglib. Masking for the output sprite is taken from the alpha
+                channel of the input, or the specified colour.
 
-output		: This is the output file. If this parameter is not given the output will default to "<input>.out".
+output        : This is the output file. If this parameter is not given the
+                output will default to "<input>.out".
 
--h|help		: Display the help.
+-h|help       : Display the help.
 
--ver		: Display version information.
+-ver          : Display version information.
 
--ss		: Silent mode.
+-ss           : Silent mode.
 
--pos=x,y	: Origin of image to be pulled from the input. Defaults to 0,0 (top-left).
+-pos=x,y      : Origin of image to be pulled from the input.
+                Defaults to 0,0 (top-left).
 
--size=x,y	: Size of the output image. Defaults to the size of the input. Can be larger than the input.
+-size=x,y     : Size of the output image. Defaults to the size of the input.
+                Can be larger than the input.
 
--mask=<mask>	: Format of the output mask:
-		b    : Output only Image (default)
-		m    : Output only Mask
-		mb   : Alternate Mask and Image bytes
-		bm   : Alternate Image and Mask bytes
-		mmbb : Alternate Mask and Image lines
-		bbmm : Alternate Image and Mask lines
+-mask=<mask>  : Format of the output mask:
+                b    : Output only Image (default)
+                m    : Output only Mask
+                mb   : Alternate Mask and Image bytes
+                bm   : Alternate Image and Mask bytes
+                mmbb : Alternate Mask and Image lines
+                bbmm : Alternate Image and Mask lines
 
--imask		: Invert the mask bits.
+-mc=rgb       : Take mask from the specified RGB colour (3 hex-digits).
+                Overrides use of alpha channel for the mask.
 
--ostd		: Send output to stdout (console) rather than a file.
-		This option implies -ss.
+-imask        : Invert the mask bits.
 
--otxt		: Output as text.
+-iimg         : Invert the image bits (default is black off, white on).
 
--obin		: Output as binary (default).
+-ostd         : Send output to stdout (console) rather than a file.
+                This option implies -ss.
 
--ltr|rtl	: Output left-to-right (default), or right-to-left.
+-otxt         : Output as text.
 
--zz		: ZigZag (alternate lines ltr/rtl).
+-odb=<db>     : Set leading text to <db>. Defaults to "db ". Tab characters
+                can be entered using "\t". -odb= on it's own gives no
+				leading text.
 
--usd		: Output upside-down (bottom line first in memory).
+-obin         : Output as binary (default).
+
+-ltr|rtl      : Output left-to-right (default), or right-to-left.
+
+-zz           : ZigZag (alternate lines ltr/rtl).
+
+-usd          : Output upside-down (bottom line first in memory).
 
 
 
 Future additions
 ================
 - Output as screen$ format.
-- Invert bytes (not just mask).
 - Support colour.
+
 
 
 Examples
@@ -73,7 +106,15 @@ To convert a sprite from a section of an image:
 To output just the mask information:
 	pngconv -mask=m image.png mask.out
 
-To output alternate lines of inverted mask then byte, upside-down, zig-zagging the sprite, as text to stdout:
+To output the mask information using purple as the mask:
+	pngconv -mask=m -mc=f0f image.png mask.out
+
+To output the image data as text with "Data	" leading:
+	pngconv -otxt -odb=Data\t image.png mask.out
+
+To output alternate lines of inverted mask then byte, upside-down, zig-zagging
+the sprite, as text to stdout:
 	pngconv -mask=mmbb -imask -usd -zz -otxt -ostd image.png
 
 
+Documentation produced on: 

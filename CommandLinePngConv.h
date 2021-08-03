@@ -23,8 +23,11 @@ public:
 	virtual std::string Help();
 	std::string m_sPngFileName;
 	std::string m_sOutFileName;
+	std::string m_sLeadText;
 	POINT m_pOrigin;
 	POINT m_pSize;
+	RGBA m_rgbaMaskColour;
+	bool m_bUseRGBMask;
 	bool m_bUpsideDown;
 	bool m_bReverse;
 	bool m_bZigZag;
@@ -32,9 +35,11 @@ public:
 	bool m_bTxtOut;
 	bool m_bSilent;
 	bool m_bVersion;
+	bool m_bInverseByte;
 	bool m_bInverseMask;
 	ZXIMAGEFORMAT m_nMaskFormat;
 protected:
+	bool DecodeRGB3(std::string param);
 	ZXIMAGEFORMAT DecodeMask(std::string param);
 	POINT DecodeXY(std::string param);
 };

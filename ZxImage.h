@@ -19,7 +19,9 @@ class CZxImage
 public:
 	friend std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi);
 	ProcessRGBAImage(CRGBAImage &_rgba);
+	void SetRGBMask(RGBA _rgba) {m_rgbMaskColour = _rgba; m_bUseRGBMask = true;};
 	void InvertMask(bool _invert = true) {m_bMaskInvert = _invert;};
+	void InvertByte(bool _invert = true) {m_bByteInvert = _invert;};
 	void SetMaskFormat(ZXIMAGEFORMAT _format) {m_nMaskFormat = _format;};
 	void SetGreyThreshold(int _grey) {if (_grey >= 0 && _grey <= 255) m_nGreyThreshold = _grey;};
 	void SetMaskThreshold(int _mask) {if (_mask >= 0 && _mask <= 255) m_nMaskThreshold = _mask;};
@@ -27,6 +29,7 @@ public:
 	void SetReverseOutput(bool _rev = true) {m_bReverse = _rev;};
 	void SetUpsideDown(bool _usd = true) {m_bUpsideDown = _usd;};
 	void SetZigZag(bool _zz = true) {m_bZigZag = _zz;};
+	void SetLeadText(std::string _ss);
 	CZxImage(POINT _size);
 	virtual ~CZxImage();
 
@@ -34,6 +37,10 @@ public:
 
 protected:
 	ZXIMAGEFORMAT m_nMaskFormat;
+	RGBA m_rgbMaskColour;
+	std::string m_sLeadText;
+	bool m_bUseRGBMask;
+	bool m_bByteInvert;
 	bool m_bMaskInvert;
 	int m_nGreyThreshold;
 	int m_nMaskThreshold;

@@ -30,6 +30,8 @@ CZxImage::CZxImage(POINT _size)
 , m_bReverse(false)
 , m_bUpsideDown(false)
 , m_bZigZag(false)
+, m_bUseRGBMask(false)
+, m_bByteInvert(false)
 {
 	// correct the X size so it's a multiple of 8
 	if (m_ptSize.x % 8)
@@ -71,7 +73,10 @@ CZxImage::ProcessRGBAImage(CRGBAImage &_rgba)
 				try
 				{
 					byteon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsOn(m_nGreyThreshold);
-					maskon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsMasked(m_nMaskThreshold);
+					if (!m_bUseRGBMask)
+						maskon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsMasked(m_nMaskThreshold);
+					else
+						maskon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsMasked(m_rgbMaskColour);
 				}
 				catch (CRGBAImage::CExBoundsViolation)
 				{
@@ -87,7 +92,27 @@ CZxImage::ProcessRGBAImage(CRGBAImage &_rgba)
 
 			if (m_bMaskInvert)
 				m_imgMask[y_idx][x_idx] = 255 - m_imgMask[y_idx][x_idx];
+			if (m_bByteInvert)
+				m_imgByte[y_idx][x_idx] = 255 - m_imgByte[y_idx][x_idx];
 		}
+	}
+}
+
+void CZxImage::SetLeadText(std::string _ss)
+{
+	m_sLeadText = _ss;
+	// if the string is not empty we may need to add a space to it... unless it's a tab or space already
+	if (!m_sLeadText.empty())
+	{
+		// first up, ensure the "\t" is converted to a tab character...
+		int pos = 0;
+		while (std::string::npos != (pos = m_sLeadText.find("\\t", pos)))
+		{
+			m_sLeadText = m_sLeadText.substr(0, pos) + std::string("\t") + m_sLeadText.substr(pos + 2);
+		}
+		char theval = m_sLeadText[m_sLeadText.size() - 1];
+		if (theval != ' ' && theval != '\t')
+			m_sLeadText += " ";
 	}
 }
 
@@ -159,153 +184,91 @@ std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
 		}
 
 		int x_idx = x_init;
-
-		switch (zxf)
+		if (zxi.m_bTextOutput) ost << zxi.m_sLeadText;
+		for (x_line = 0; x_line < x_count; ++x_line)
 		{
-		case ZXIMAGE_FORMAT_B:
-		case ZXIMAGE_FORMAT_BBMM:
+			switch (zxf)
 			{
-				// output a line of bytes
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
+			case ZXIMAGE_FORMAT_B:
+			case ZXIMAGE_FORMAT_BBMM:
+				if (zxi.m_bTextOutput)
+					ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
+				else
+					ost << zxi.m_imgByte[y_idx][x_idx];
+				break;
+
+			case ZXIMAGE_FORMAT_M:
+			case ZXIMAGE_FORMAT_MMBB:
+				if (zxi.m_bTextOutput)
+					ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
+				else
+					ost << zxi.m_imgMask[y_idx][x_idx];
+				break;
+
+			case ZXIMAGE_FORMAT_BM:
+				if (zxi.m_bTextOutput)
+					ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
+				else
+					ost << zxi.m_imgByte[y_idx][x_idx] << zxi.m_imgMask[y_idx][x_idx];
+				break;
+
+			case ZXIMAGE_FORMAT_MB:
+				if (zxi.m_bTextOutput)
+					ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
+				else
+					ost << zxi.m_imgMask[y_idx][x_idx] << zxi.m_imgByte[y_idx][x_idx];
+				break;
+
+			default:
 				{
-					if (zxi.m_bTextOutput)
-					{
-						ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
-					else
-					{
-						ost << zxi.m_imgByte[y_idx][x_idx];
-					}
-					x_idx += x_delta;
+					// whoops!
+					std::ostringstream except;
+					except << zxf;
+					throw CZxImage::CExUnknownMask(except.str());
 				}
-				if (zxi.m_bTextOutput) ost << std::endl;
+				break;
 			}
-			break;
-		case ZXIMAGE_FORMAT_M:
-		case ZXIMAGE_FORMAT_MMBB:
-			{
-				// output a line of mask
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
-				{
-					if (zxi.m_bTextOutput)
-					{
-						ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
-					else
-					{
-						ost << zxi.m_imgMask[y_idx][x_idx];
-					}
-					x_idx += x_delta;
-				}
-				if (zxi.m_bTextOutput) ost << std::endl;
-			}
-			break;
-		case ZXIMAGE_FORMAT_BM:
-			{
-				// output alternating byte/mask
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
-				{
-					if (zxi.m_bTextOutput)
-					{
-						ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
-					else
-					{
-						ost << zxi.m_imgByte[y_idx][x_idx] << zxi.m_imgMask[y_idx][x_idx];
-					}
-					x_idx += x_delta;
-				}
-				if (zxi.m_bTextOutput) ost << std::endl;
-			}
-			break;
-		case ZXIMAGE_FORMAT_MB:
-			{
-				// output alternating mask/byte
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
-				{
-					if (zxi.m_bTextOutput)
-					{
-						ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
-					else
-					{
-						ost << zxi.m_imgMask[y_idx][x_idx] << zxi.m_imgByte[y_idx][x_idx];
-					}
-					x_idx += x_delta;
-				}
-				if (zxi.m_bTextOutput) ost << std::endl;
-			}
-			break;
-		default:
-			{
-				// whoops!
-				std::ostringstream except;
-				except << zxf;
-				throw CZxImage::CExUnknownMask(except.str());
-			}
-			break;
+
+			if (zxi.m_bTextOutput && (x_line + 1 < x_count)) ost << ",";
+			x_idx += x_delta;
 		}
+		if (zxi.m_bTextOutput) ost << std::endl;
+
+
 
 		// now some clean-up in case we were doing a line-by-line thing...
 		// we need to go through and print out the other line.
-		switch (zxf)
+		x_idx = x_init;
+		if (ZXIMAGE_FORMAT_BBMM == zxf || ZXIMAGE_FORMAT_MMBB == zxf)
 		{
-		case ZXIMAGE_FORMAT_BBMM:
+			x_idx = x_init;
+			if (zxi.m_bTextOutput) ost << zxi.m_sLeadText;
+			for (x_line = 0; x_line < x_count; ++x_line)
 			{
-				// output a line of masks now
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
+				switch (zxf)
 				{
+				case ZXIMAGE_FORMAT_BBMM:
 					if (zxi.m_bTextOutput)
-					{
 						ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
 					else
-					{
-						ost << zxi.m_imgByte[y_idx][x_idx];
-					}
-					x_idx += x_delta;
-				}
-				if (zxi.m_bTextOutput) ost << std::endl;
-			}
-			break;
-		case ZXIMAGE_FORMAT_MMBB:
-			{
-				// output a line of bytes now
-				x_idx = x_init;
-				if (zxi.m_bTextOutput) ost << "db ";
-				for (x_line = 0; x_line < x_count; ++x_line)
-				{
+						ost << zxi.m_imgMask[y_idx][x_idx];
+					break;
+
+				case ZXIMAGE_FORMAT_MMBB:
 					if (zxi.m_bTextOutput)
-					{
 						ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
-						if (x_line + 1 < x_count) ost << ",";
-					}
 					else
-					{
 						ost << zxi.m_imgByte[y_idx][x_idx];
-					}
-					x_idx += x_delta;
+					break;
+
+				default:
+					break;
 				}
-				if (zxi.m_bTextOutput) ost << std::endl;
+
+				if (zxi.m_bTextOutput && (x_line + 1 < x_count)) ost << ",";
+				x_idx += x_delta;
 			}
-			break;
-		default:
-			break;
+			if (zxi.m_bTextOutput) ost << std::endl;
 		}
 
 		y_idx += y_delta;

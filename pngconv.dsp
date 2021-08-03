@@ -58,8 +58,9 @@ InputPath=.\Release\pngconv.exe
 SOURCE="$(InputPath)"
 
 "$(OutDir)\pngconv.txt" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(ProjDir)\pngconv.txt $(OutDir) /y
-
+	copy "$(ProjDir)\pngconv.txt" "$(OutDir)" /y 
+	date /t >> "$(OutDir)\pngconv.txt" 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "pngconv - Win32 Debug"
@@ -92,8 +93,9 @@ InputPath=.\Debug\pngconv.exe
 SOURCE="$(InputPath)"
 
 "$(OutDir)\pngconv.txt" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(ProjDir)\pngconv.txt $(OutDir) /y
-
+	copy "$(ProjDir)\pngconv.txt" "$(OutDir)" /y 
+	date /t >> "$(OutDir)\pngconv.txt" 
+	
 # End Custom Build
 
 !ENDIF 

@@ -73,7 +73,11 @@ int main(int argc, char* argv[])
 
 			// set up our conversion options
 			zximg.InvertMask(cmdLine.m_bInverseMask);
+			zximg.InvertByte(cmdLine.m_bInverseByte);
 			zximg.SetMaskFormat(cmdLine.m_nMaskFormat);
+
+			if (cmdLine.m_bUseRGBMask)
+				zximg.SetRGBMask(cmdLine.m_rgbaMaskColour);
 
 			zximg.ProcessRGBAImage(rgbaimg);
 
@@ -82,6 +86,7 @@ int main(int argc, char* argv[])
 			zximg.SetReverseOutput(cmdLine.m_bReverse);
 			zximg.SetUpsideDown(cmdLine.m_bUpsideDown);
 			zximg.SetZigZag(cmdLine.m_bZigZag);
+			zximg.SetLeadText(cmdLine.m_sLeadText);
 
 			// now we'll set up our output stream.
 			// we'll send to either stdout or a file.
