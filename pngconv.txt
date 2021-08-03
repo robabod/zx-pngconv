@@ -1,15 +1,19 @@
-PngConv v0.0.2
+PngConv v0.0.3
 =------------=
 
 PNGConv is a PNG to ZX Spectrum Image Convertor. The aim is to allow you to
-perform image conversions from the command-line, primarily from with a makefile
-or batch file. This is an early test release, so don't rely on it to do what you
-would expect.
-
+perform image conversions from the command-line, primarily from within a
+makefile or batch file.
 
 
 History:
 ========
+
+v0.0.3 - 06/12/2006
+- Fixed a possible problem when using a colour as a mask.
+  It could potentially be recognised as image data.
++ Added "-oapp" option to append output to a file.
++ Added "-ohex[=<str>]" option to output as Hex text.
 
 v0.0.2 - 07/11/2006
 ------
@@ -75,9 +79,15 @@ output        : This is the output file. If this parameter is not given the
 
 -odb=<db>     : Set leading text to <db>. Defaults to "db ". Tab characters
                 can be entered using "\t". -odb= on it's own gives no
-				leading text.
+                leading text.
+
+-ohex[=<$>]   : Set text output to Hex format, with optional leading char.
+                Default is to output in decimal.
+                Defaults leading hex char is "$".
 
 -obin         : Output as binary (default).
+
+-oapp         : Append output (default erases original output file).
 
 -ltr|rtl      : Output left-to-right (default), or right-to-left.
 
@@ -91,7 +101,7 @@ Future additions
 ================
 - Output as screen$ format.
 - Support colour.
-
+- Allow stdin as input (allows piping from another command).
 
 
 Examples
@@ -116,5 +126,11 @@ To output alternate lines of inverted mask then byte, upside-down, zig-zagging
 the sprite, as text to stdout:
 	pngconv -mask=mmbb -imask -usd -zz -otxt -ostd image.png
 
+To output a simple sprite to a hex text file, with leading char of #:
+	pngconv -otxt -ohex=# -odb=BYTE image.png image.out
+
+To output two sections of an image into a single file:
+	pngconv -pos=0,0 -size=8,64 image.png image.out
+	pngconv -pos=8,0 -size=8,64 -oapp image.png image.out
 
 Documentation produced on: 

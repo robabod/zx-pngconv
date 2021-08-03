@@ -1,0 +1,66 @@
+# Microsoft Developer Studio Generated Dependency File, included by pngconv.mak
+
+.\CommandLine.cpp : \
+	".\CommandLine.h"\
+	".\pngconv.h"\
+	
+
+.\CommandLinePngConv.cpp : \
+	".\CommandLine.h"\
+	".\CommandLinePngConv.h"\
+	".\pngconv.h"\
+	".\typedefs.h"\
+	
+
+.\pngconv.cpp : \
+	".\CommandLine.h"\
+	".\CommandLinePngConv.h"\
+	".\exceptions.h"\
+	".\libpng-1.2.12\png.h"\
+	".\libpng-1.2.12\pngconf.h"\
+	".\pngconv.h"\
+	".\PngImage.h"\
+	".\RGBAImage.h"\
+	".\typedefs.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	".\ZxImage.h"\
+	
+
+.\PngImage.cpp : \
+	".\exceptions.h"\
+	".\libpng-1.2.12\png.h"\
+	".\libpng-1.2.12\pngconf.h"\
+	".\pngconv.h"\
+	".\PngImage.h"\
+	".\typedefs.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	
+
+.\RGBAImage.cpp : \
+	".\libpng-1.2.12\png.h"\
+	".\libpng-1.2.12\pngconf.h"\
+	".\pngconv.h"\
+	".\PngImage.h"\
+	".\RGBAImage.h"\
+	".\typedefs.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	
+
+.\StdAfx.cpp : \
+	".\StdAfx.h"\
+	
+
+.\ZxImage.cpp : \
+	".\libpng-1.2.12\png.h"\
+	".\libpng-1.2.12\pngconf.h"\
+	".\pngconv.h"\
+	".\PngImage.h"\
+	".\RGBAImage.h"\
+	".\typedefs.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	".\ZxImage.h"\
+	

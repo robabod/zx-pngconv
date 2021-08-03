@@ -32,6 +32,7 @@ CZxImage::CZxImage(POINT _size)
 , m_bZigZag(false)
 , m_bUseRGBMask(false)
 , m_bByteInvert(false)
+, m_bHexOutput(false)
 {
 	// correct the X size so it's a multiple of 8
 	if (m_ptSize.x % 8)
@@ -76,7 +77,11 @@ CZxImage::ProcessRGBAImage(CRGBAImage &_rgba)
 					if (!m_bUseRGBMask)
 						maskon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsMasked(m_nMaskThreshold);
 					else
+					{
 						maskon = _rgba(y_idx, (8*x_idx) + b_idx).PixelIsMasked(m_rgbMaskColour);
+						if (maskon)
+							byteon = false;
+					}
 				}
 				catch (CRGBAImage::CExBoundsViolation)
 				{
@@ -114,6 +119,30 @@ void CZxImage::SetLeadText(std::string _ss)
 		if (theval != ' ' && theval != '\t')
 			m_sLeadText += " ";
 	}
+}
+
+std::ostream& txtoutput(std::ostream& ost, const CZxImage& zxi)
+{
+	// This method outputs the required manipulators for text output.
+	if (zxi.m_bHexOutput)
+		ost << zxi.m_sLeadTextByte << std::ios::hex;
+	return ost;
+}
+
+std::ostream& txtoutput(std::ostream& ost, const CZxImage& zxi, int i)
+{
+	// This method outputs the required manipulators for text output.
+	if (zxi.m_bHexOutput)
+	{
+		ost << zxi.m_sLeadTextByte;
+		ost.width(2);
+		ost.fill('0');
+		ost.setf(std::ios_base::hex, std::ios_base::basefield);
+		ost << i;
+	}
+	else
+		ost << i;
+	return ost;
 }
 
 std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
@@ -192,7 +221,7 @@ std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
 			case ZXIMAGE_FORMAT_B:
 			case ZXIMAGE_FORMAT_BBMM:
 				if (zxi.m_bTextOutput)
-					ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgByte[y_idx][x_idx]));
 				else
 					ost << zxi.m_imgByte[y_idx][x_idx];
 				break;
@@ -200,21 +229,29 @@ std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
 			case ZXIMAGE_FORMAT_M:
 			case ZXIMAGE_FORMAT_MMBB:
 				if (zxi.m_bTextOutput)
-					ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgMask[y_idx][x_idx]));
 				else
 					ost << zxi.m_imgMask[y_idx][x_idx];
 				break;
 
 			case ZXIMAGE_FORMAT_BM:
 				if (zxi.m_bTextOutput)
-					ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
+				{
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgByte[y_idx][x_idx]));
+					ost << ",";
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgMask[y_idx][x_idx]));
+				}
 				else
 					ost << zxi.m_imgByte[y_idx][x_idx] << zxi.m_imgMask[y_idx][x_idx];
 				break;
 
 			case ZXIMAGE_FORMAT_MB:
 				if (zxi.m_bTextOutput)
-					ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]) << "," << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
+				{
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgMask[y_idx][x_idx]));
+					ost << ",";
+					txtoutput(ost, zxi, static_cast<int>(zxi.m_imgByte[y_idx][x_idx]));
+				}
 				else
 					ost << zxi.m_imgMask[y_idx][x_idx] << zxi.m_imgByte[y_idx][x_idx];
 				break;
@@ -249,14 +286,14 @@ std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
 				{
 				case ZXIMAGE_FORMAT_BBMM:
 					if (zxi.m_bTextOutput)
-						ost << static_cast<int>(zxi.m_imgMask[y_idx][x_idx]);
+						txtoutput(ost, zxi, static_cast<int>(zxi.m_imgMask[y_idx][x_idx]));
 					else
 						ost << zxi.m_imgMask[y_idx][x_idx];
 					break;
 
 				case ZXIMAGE_FORMAT_MMBB:
 					if (zxi.m_bTextOutput)
-						ost << static_cast<int>(zxi.m_imgByte[y_idx][x_idx]);
+						txtoutput(ost, zxi, static_cast<int>(zxi.m_imgByte[y_idx][x_idx]));
 					else
 						ost << zxi.m_imgByte[y_idx][x_idx];
 					break;
@@ -276,3 +313,4 @@ std::ostream& operator<< (std::ostream& ost, const CZxImage& zxi)
 
 	return ost;
 }
+

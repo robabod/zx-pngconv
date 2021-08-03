@@ -66,8 +66,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,2,0
- PRODUCTVERSION 0,0,2,0
+ FILEVERSION 0,0,3,0
+ PRODUCTVERSION 0,0,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -85,14 +85,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "raww\0"
             VALUE "FileDescription", "PNG to Spectrum Conversion Utility\0"
-            VALUE "FileVersion", "0, 0, 2, 0\0"
+            VALUE "FileVersion", "0, 0, 3, 0\0"
             VALUE "InternalName", "pngconv.exe\0"
             VALUE "LegalCopyright", "© 2006 Robert Cooper\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "pngconv.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "pngconv\0"
-            VALUE "ProductVersion", "0, 0, 2, 0\0"
+            VALUE "ProductVersion", "0, 0, 3, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

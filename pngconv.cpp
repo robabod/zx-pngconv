@@ -87,6 +87,7 @@ int main(int argc, char* argv[])
 			zximg.SetUpsideDown(cmdLine.m_bUpsideDown);
 			zximg.SetZigZag(cmdLine.m_bZigZag);
 			zximg.SetLeadText(cmdLine.m_sLeadText);
+			zximg.SetHexOutput(cmdLine.m_bHexOutput, cmdLine.m_sLeadTextByte);
 
 			// now we'll set up our output stream.
 			// we'll send to either stdout or a file.
@@ -106,6 +107,8 @@ int main(int argc, char* argv[])
 				int open_flags = std::ios::out;
 				if (!cmdLine.m_bTxtOut)
 					open_flags |= std::ios::binary;
+				if (cmdLine.m_bOutputAppend)
+					open_flags |= std::ios::app;
 				fileout.open(cmdLine.m_sOutFileName.c_str(), open_flags);
 				if (!fileout.is_open())
 				{

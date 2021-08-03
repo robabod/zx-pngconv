@@ -24,6 +24,7 @@ public:
 	std::string m_sPngFileName;
 	std::string m_sOutFileName;
 	std::string m_sLeadText;
+	std::string m_sLeadTextByte;
 	POINT m_pOrigin;
 	POINT m_pSize;
 	RGBA m_rgbaMaskColour;
@@ -37,6 +38,8 @@ public:
 	bool m_bVersion;
 	bool m_bInverseByte;
 	bool m_bInverseMask;
+	bool m_bOutputAppend;
+	bool m_bHexOutput;
 	ZXIMAGEFORMAT m_nMaskFormat;
 protected:
 	bool DecodeRGB3(std::string param);

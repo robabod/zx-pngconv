@@ -30,6 +30,9 @@ CCommandLinePngConv::CCommandLinePngConv()
 , m_bUseRGBMask(false)
 , m_bInverseByte(false)
 , m_sLeadText("db ")
+, m_bOutputAppend(false)
+, m_bHexOutput(false)
+, m_sLeadTextByte("$")
 {
 	m_pOrigin.x = m_pOrigin.y = 0;
 	m_pSize.x = m_pSize.y = -1;
@@ -87,6 +90,15 @@ void CCommandLinePngConv::ParseParam(std::string param, bool bFlag, bool bLast)
 			m_bInverseByte = true;
 		else if (!param.compare(0, 4, "odb="))
 			m_sLeadText = param.substr(4);
+		else if (!param.compare("oapp"))
+			m_bOutputAppend = true;
+		else if (!param.compare("ohex"))
+			m_bHexOutput = true;
+		else if (!param.compare(0, 5, "ohex="))
+		{
+			m_bHexOutput = true;
+			m_sLeadTextByte = param.substr(5);
+		}
 		else
 			m_bCommandLineError = true;
 	}
@@ -112,7 +124,7 @@ std::string CCommandLinePngConv::Help()
 {
 	std::string help;
 	// add our params to the list...
-	help  = "Usage:\n  " + m_sAppName + " [-h|-help] [-ver] [-ss] [-pos=x,y] [-size=x,y] [-imask] [-mask=<mask>] [-ostd] [-otxt|-obin] [-lrt|rtl] [-zz] [-usd] input <output>";
+	help  = "Usage:\n  " + m_sAppName + " [-h|-help] [-ver] [-ss] [-pos=x,y] [-size=x,y] [-imask] [-mask=<mask>] [-ostd] [-otxt|-obin] [-lrt|rtl] [-zz] [-usd] [-ohex[=<$>]] [-oapp] input <output>";
 
 	help += "\n\nFlags:";
 
@@ -136,7 +148,10 @@ std::string CCommandLinePngConv::Help()
 	help += "\n  -otxt           Output as text";
 	help += "\n  -odb=<db>       Leading text when -otxt option used. Default is \"db \".";
 	help += "\n                  \"-odb=\" will give no leading text in output.";
+	help += "\n  -ohex[=<$>]     Set text output to Hex format, with optional leading char.";
+	help += "\n                  Default output is decimal. Default leading hex char is \"$\".";
 	help += "\n  -obin           Output as binary (default)";
+	help += "\n  -oapp           Append output (default erases original output file)";
 	help += "\n  -ltr|rtl        Set output left-to-right (default) or right-to-left";
 	help += "\n  -zz             ZigZag Output (alternate ltr, rtl)";
 	help += "\n  -usd            Upside down (output bottom line first)";
