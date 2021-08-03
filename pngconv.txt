@@ -1,0 +1,79 @@
+PngConv v0.0.1
+=------------=
+
+PNGConv is a PNG to ZX Spectrum Image Convertor. The aim is to allow you to perform image conversions from the command-line, primarily from with a makefile or batch file. This is an early test release, so don't rely on it to do what you would expect.
+
+
+History:
+========
+v0.0.1	: First public release.
+
+
+Command Line
+============
+PngConv [options] input [output]
+
+Detail:
+
+input		: This parameter is required and is the source .png file. There is no required format - the image will be converted internally to the correct format, providing the image can be read by pnglib. Masking for the output sprite is taken from the alpha channel of the input.
+
+output		: This is the output file. If this parameter is not given the output will default to "<input>.out".
+
+-h|help		: Display the help.
+
+-ver		: Display version information.
+
+-ss		: Silent mode.
+
+-pos=x,y	: Origin of image to be pulled from the input. Defaults to 0,0 (top-left).
+
+-size=x,y	: Size of the output image. Defaults to the size of the input. Can be larger than the input.
+
+-mask=<mask>	: Format of the output mask:
+		b    : Output only Image (default)
+		m    : Output only Mask
+		mb   : Alternate Mask and Image bytes
+		bm   : Alternate Image and Mask bytes
+		mmbb : Alternate Mask and Image lines
+		bbmm : Alternate Image and Mask lines
+
+-imask		: Invert the mask bits.
+
+-ostd		: Send output to stdout (console) rather than a file.
+		This option implies -ss.
+
+-otxt		: Output as text.
+
+-obin		: Output as binary (default).
+
+-ltr|rtl	: Output left-to-right (default), or right-to-left.
+
+-zz		: ZigZag (alternate lines ltr/rtl).
+
+-usd		: Output upside-down (bottom line first in memory).
+
+
+
+Future additions
+================
+- Output as screen$ format.
+- Invert bytes (not just mask).
+- Support colour.
+
+
+Examples
+========
+
+To convert a simple sprite image:
+	pngconv image.png image.out
+
+To convert a sprite from a section of an image:
+	pngconv -pos=20,20 -size=16,16 image.png sprite.out
+
+To output just the mask information:
+	pngconv -mask=m image.png mask.out
+
+To output alternate lines of inverted mask then byte, upside-down, zig-zagging the sprite, as text to stdout:
+	pngconv -mask=mmbb -imask -usd -zz -otxt -ostd image.png
+
+
